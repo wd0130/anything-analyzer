@@ -17,6 +17,7 @@ nsis:
 mac:
   target:
     - dmg
+  artifactName: "${productName}-${version}-${arch}.${ext}"
 linux:
   target:
     - AppImage
