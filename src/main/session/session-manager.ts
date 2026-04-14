@@ -166,10 +166,11 @@ export class SessionManager {
     const bundle = this.tabCaptures.get(tabId);
     if (!bundle) return;
 
+    // Stop storage FIRST — its stop() does a final collectAll() that needs the debugger alive
+    bundle.storage.stop();
+    bundle.injector.stop();
     bundle.cdp.stop();
     bundle.cdp.detach();
-    bundle.injector.stop();
-    bundle.storage.stop();
     this.tabCaptures.delete(tabId);
   }
 
@@ -180,9 +181,9 @@ export class SessionManager {
     if (this.currentSessionId !== sessionId) return;
 
     for (const bundle of this.tabCaptures.values()) {
-      await bundle.cdp.stop();
-      bundle.injector.stop();
       bundle.storage.stop();
+      bundle.injector.stop();
+      await bundle.cdp.stop();
     }
 
     this.sessionsRepo.updateStatus(sessionId, "paused");

@@ -49,7 +49,7 @@ export class StorageCollector extends EventEmitter {
       const currentUrl = this.webContents.getURL()
       const result = await this.webContents.debugger.sendCommand('Network.getCookies', { urls: [currentUrl] }) as { cookies: Array<Record<string, unknown>> }
       this.emit('storage-collected', { domain, storageType: 'cookie', data: JSON.stringify(result.cookies || []), timestamp })
-    } catch { /* ignore */ }
+    } catch (err) { console.warn('[StorageCollector] collectCookies failed:', (err as Error).message) }
   }
 
   private async collectLocalStorage(domain: string, timestamp: number): Promise<void> {
@@ -57,7 +57,7 @@ export class StorageCollector extends EventEmitter {
     try {
       const result = await this.webContents.debugger.sendCommand('Runtime.evaluate', { expression: 'JSON.stringify(localStorage)', returnByValue: true }) as { result: { value?: string } }
       this.emit('storage-collected', { domain, storageType: 'localStorage', data: result.result?.value || '{}', timestamp })
-    } catch { /* ignore */ }
+    } catch (err) { console.warn('[StorageCollector] collectLocalStorage failed:', (err as Error).message) }
   }
 
   private async collectSessionStorage(domain: string, timestamp: number): Promise<void> {
@@ -65,7 +65,7 @@ export class StorageCollector extends EventEmitter {
     try {
       const result = await this.webContents.debugger.sendCommand('Runtime.evaluate', { expression: 'JSON.stringify(sessionStorage)', returnByValue: true }) as { result: { value?: string } }
       this.emit('storage-collected', { domain, storageType: 'sessionStorage', data: result.result?.value || '{}', timestamp })
-    } catch { /* ignore */ }
+    } catch (err) { console.warn('[StorageCollector] collectSessionStorage failed:', (err as Error).message) }
   }
 
   private getCurrentDomain(): string {
